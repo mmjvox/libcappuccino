@@ -1,0 +1,72 @@
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+index 50218fe..0b65a99 100644
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -1,6 +1,6 @@
+ cmake_minimum_required(VERSION 3.5)
+ project(cappuccino
+-    VERSION 0.9
++    VERSION 1.0.0
+     LANGUAGES CXX
+     DESCRIPTION "C++17 Cache and Associative Data Structure Library")
+
+@@ -42,7 +42,9 @@ add_library(${PROJECT_NAME} STATIC ${CAPPUCCINO_SOURCE_FILES})
+ set_target_properties(${PROJECT_NAME} PROPERTIES LINKER_LANGUAGE CXX)
+ target_compile_features(${PROJECT_NAME} PUBLIC cxx_std_17)
+
+-target_include_directories(${PROJECT_NAME} PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/inc)
++target_include_directories(${PROJECT_NAME} PUBLIC
++    $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/inc>
++    $<INSTALL_INTERFACE:include>)
+
+ if(${CMAKE_CXX_COMPILER_ID} MATCHES "GNU")
+     target_compile_options(${PROJECT_NAME} PRIVATE
+@@ -80,3 +82,35 @@ if(CAPPUCCINO_BUILD_TESTS)
+     enable_testing()
+     add_subdirectory(test)
+ endif()
++
++
++
++file(GLOB_RECURSE CAPPUCCINO_HEADERS RELATIVE ${CMAKE_CURRENT_SOURCE_DIR} ${CMAKE_CURRENT_SOURCE_DIR}/inc/cappuccino/*.hpp)
++
++target_include_directories(cappuccino PUBLIC include)
++
++
++string(JOIN ";" CAPPUCCINO_HEADERS_STRING ${CAPPUCCINO_HEADERS})
++set_target_properties(cappuccino PROPERTIES
++    PUBLIC_HEADER "${CAPPUCCINO_HEADERS_STRING}"
++)
++
++include(GNUInstallDirs)
++
++include(CMakePackageConfigHelpers)
++configure_package_config_file(
++    "${CMAKE_CURRENT_SOURCE_DIR}/Config.cmake.in"
++    "${CMAKE_CURRENT_BINARY_DIR}/cappuccinoConfig.cmake"
++    INSTALL_DESTINATION
++    ${CMAKE_INSTALL_LIBDIR}/cmake/cappuccino
++)
++
++install(FILES ${CAPPUCCINO_HEADERS}
++        DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/cappuccino)
++install(FILES ${CMAKE_CURRENT_BINARY_DIR}/cappuccinoConfig.cmake
++        DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/cappuccino)
++install(TARGETS cappuccino
++    ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
++    LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
++)
++
+diff --git a/Config.cmake.in b/Config.cmake.in
+new file mode 100644
+index 0000000..efd356c
+--- /dev/null
++++ b/Config.cmake.in
+@@ -0,0 +1,7 @@
++@PACKAGE_INIT@
++
++include("${CMAKE_CURRENT_LIST_DIR}/cappuccinoTargets.cmake")
++get_filename_component(PARENT_DIR ${CMAKE_CURRENT_LIST_DIR} DIRECTORY)
++get_filename_component(INSTALLED_LIB_DIR ${PARENT_DIR} DIRECTORY)
++set(cappuccino_INCLUDE_DIRS "${CMAKE_INSTALL_PREFIX}/include")
++set(cappuccino_LIBRARIES "${INSTALLED_LIB_DIR}/libcappuccino.a")

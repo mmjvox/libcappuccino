@@ -1,0 +1,9 @@
+sources:
+  "1.0.0":
+    url: "https://github.com/jbaldwin/libcappuccino/archive/refs/tags/v1.0.0.tar.gz"
+    sha256: "100d26c60f34eb7478295e6e710ba80369ce66006fedf0d78486c13c36881f9e"
+patches:
+  "1.0.0":
+    - patch_file: "patches/1.0.0-0001_add_installation.patch"
+      patch_description: "add installation targets to cmake project"
+      patch_type: "conan"
